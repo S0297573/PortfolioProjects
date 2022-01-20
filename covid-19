@@ -1,0 +1,131 @@
+SELECT
+  Location,
+  date,
+  total_cases,
+  new_cases,
+  total_deaths,
+  population
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+WHERE
+  continent IS NOT NULL
+ORDER BY
+  1,
+  2; 
+  --SEARCH FOR total cases vs total death
+   --likelyhood TO death
+--IF a person get infected
+SELECT
+  Location,
+  date,
+  total_cases,
+  total_deaths,
+  (total_deaths/total_cases)*100 AS deathPercetage
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+WHERE
+  Location = "United States"
+ORDER BY
+  1,
+  2; --SEARCH FOR total cases vs population
+SELECT
+  Location,
+  date,
+  population,
+  total_cases,
+  (total_cases/population)*100 AS casePercetage
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+WHERE
+  Location = "United States"
+ORDER BY
+  1,
+  2; --searching FOR countries
+WITH
+  highest infection rate
+SELECT
+  Location,
+  population,
+  MAX(total_cases) AS HighestInfectionCount,
+  MAX((total_cases/population))*100 AS TotalPopulationInfected
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+GROUP BY
+  Location,
+  population
+ORDER BY
+  TotalPopulationInfected DESC ; --highest death count per population according TO countries
+SELECT
+  Location,
+  MAX(CAST(total_deaths AS int)) AS TotalDeathCounts
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+GROUP BY
+  Location
+ORDER BY
+  TotalDeathCounts DESC ; --death count divided INTO sections
+SELECT
+  Location,
+  MAX(CAST(total_deaths AS int)) AS TotalDeathCounts
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+WHERE
+  continent IS NULL
+GROUP BY
+  Location
+ORDER BY
+  TotalDeathCounts DESC ; --death count per population according TO continents
+SELECT
+  continent,
+  MAX(CAST(total_deaths AS int)) AS TotalDeathCounts
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+GROUP BY
+  continent
+ORDER BY
+  TotalDeathCounts DESC ; --global cases
+  AND deaths per day
+SELECT
+  date,
+  SUM(new_cases) AS TotalCaseCounts,
+  SUM(CAST(new_deaths AS int)) AS TotalDeathCounts,
+  SUM(CAST(new_deaths AS int))/SUM(new_cases)*100 AS Death_Percent
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+WHERE
+  continent IS NOT NULL
+GROUP BY
+  date
+ORDER BY
+  1,
+  2; --global deaths
+  AND percentage
+SELECT
+  SUM(new_cases) AS TotalCaseCounts,
+  SUM(CAST(new_deaths AS int)) AS TotalDeathCounts,
+  SUM(CAST(new_deaths AS int))/SUM(new_cases)*100 AS Death_Percent
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths`
+WHERE
+  continent IS NOT NULL
+ORDER BY
+  1,
+  2; --vaccination-- --death
+  AND vaccination--
+SELECT
+  dea.continent,
+  dea.Location,
+  dea.date,
+  dea.population,
+  vac.new_vaccinations,
+  SUM(vac.new_vaccinations) OVER (PARTITION BY dea.Location ORDER BY dea.Location, dea.date) AS rollingOfVaccination
+FROM
+  `boxwood-charmer-331600.covid_19.covidDeaths` AS dea
+JOIN
+  `boxwood-charmer-331600.covid_19.covidVaccination` AS vac
+ON
+  dea.Location = vac.Location
+  AND dea.date = vac.date --
+ORDER BY
+  2,
+  3; -- use CTE
